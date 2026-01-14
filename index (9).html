@@ -1,0 +1,518 @@
+html
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Евро Банк - Управление на сметка</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #0057b8 0%, #004494 100%);
+            color: white;
+            padding: 20px 0;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo i {
+            font-size: 2.5rem;
+        }
+        
+        .logo-text h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+        
+        .logo-text p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .user-info {
+            text-align: right;
+        }
+        
+        .balance-display {
+            background-color: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 30px 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border-left: 5px solid #0057b8;
+        }
+        
+        .balance-title {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+        
+        .balance-amount {
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: #0057b8;
+        }
+        
+        .currency {
+            font-size: 1.8rem;
+            color: #004494;
+        }
+        
+        .content-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .form-section, .withdrawal-section, .recent-withdrawals {
+            flex: 1;
+            min-width: 300px;
+            background-color: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .section-title {
+            color: #0057b8;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+            font-size: 1.4rem;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #0057b8;
+        }
+        
+        .withdrawal-info {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+        
+        .fee-amount {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #d32f2f;
+            margin: 10px 0;
+        }
+        
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(to right, #0057b8, #004494);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .btn:hover {
+            background: linear-gradient(to right, #004494, #003575);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 87, 184, 0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        .btn-disabled:hover {
+            background: #cccccc;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .processing {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .processing p {
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            color: #0057b8;
+            font-weight: 600;
+        }
+        
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 6px solid #f0f0f0;
+            border-top: 6px solid #0057b8;
+            border-radius: 50%;
+            animation: spin 1.5s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .withdrawal-list {
+            list-style-type: none;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .withdrawal-item {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .withdrawal-item:last-child {
+            border-bottom: none;
+        }
+        
+        .withdrawal-name {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .withdrawal-date {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .withdrawal-amount {
+            font-weight: 700;
+            color: #0057b8;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 0.9rem;
+            border-top: 1px solid #eee;
+            margin-top: 30px;
+        }
+        
+        .highlight {
+            background-color: #fff8e1;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #ffc107;
+        }
+        
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+            
+            .user-info {
+                text-align: center;
+            }
+            
+            .balance-amount {
+                font-size: 2.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-university"></i>
+                    <div class="logo-text">
+                        <h1>Евро Банк</h1>
+                        <p>Надеждност и иновации</p>
+                    </div>
+                </div>
+                <div class="user-info">
+                    <p><i class="fas fa-user-circle"></i> Онлайн банкиране</p>
+                    <p>Последен достъп: Днес, 14:32</p>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="balance-display">
+            <div class="balance-title">Налична сума по сметка</div>
+            <div class="balance-amount">60 000 <span class="currency">€</span></div>
+            <p>Сумата е налична за теглене</p>
+        </div>
+        
+        <div class="highlight">
+            <p><i class="fas fa-info-circle"></i> За да изтеглите средствата, е необходимо да попълните данните по-долу и да платите такса за обработка на тегленето от 300 €.</p>
+        </div>
+        
+        <div class="content-wrapper">
+            <div class="form-section">
+                <h2 class="section-title"><i class="fas fa-user-edit"></i> Лични данни</h2>
+                <form id="userForm">
+                    <div class="form-group">
+                        <label for="name">Име и фамилия:</label>
+                        <input type="text" id="name" placeholder="Въведете пълното си име" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="accountNumber">Номер на сметка:</label>
+                        <input type="text" id="accountNumber" placeholder="BG00XXXXXXXXXXXXXX" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="bankName">Име на банка:</label>
+                        <select id="bankName" required>
+                            <option value="">Изберете банка</option>
+                            <option value="Евро Банк">Евро Банк</option>
+                            <option value="УниКредит Булбанк">УниКредит Булбанк</option>
+                            <option value="ДСК">ДСК</option>
+                            <option value="ПИБ">ПИБ</option>
+                            <option value="Пощенска банка">Пощенска банка</option>
+                            <option value="ОББ">ОББ</option>
+                            <option value="Други">Други</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="bankBranch">Клон на банката:</label>
+                        <input type="text" id="bankBranch" placeholder="Град и адрес на клона" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Имейл адрес:</label>
+                        <input type="email" id="email" placeholder="Вашият имейл за контакт" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="phone">Телефонен номер:</label>
+                        <input type="tel" id="phone" placeholder="+359 XXX XXX XXX" required>
+                    </div>
+                    
+                    <button type="submit" class="btn" id="submitBtn">Запазване на данните</button>
+                </form>
+            </div>
+            
+            <div class="withdrawal-section">
+                <h2 class="section-title"><i class="fas fa-euro-sign"></i> Теглене на средства</h2>
+                
+                <div class="withdrawal-info">
+                    <p>Такса за обработка на теглене:</p>
+                    <div class="fee-amount">300 €</div>
+                    <p><small>Тази такса е отделна от сумата по вашата сметка и се заплаща за обработката на заявката за теглене.</small></p>
+                </div>
+                
+                <p>За да теглите 60 000 € от вашата сметка, моля, заплатете таксата от 300 €.</p>
+                
+                <button class="btn" id="withdrawBtn" disabled>Заплатете 300 € за теглене</button>
+                
+                <div class="processing" id="processingSection">
+                    <p>Обработване на плащането...</p>
+                    <div class="spinner"></div>
+                    <p style="margin-top: 15px;">Моля, изчакайте докато обработваме вашето плащане. Това може да отнеме няколко секунди.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="recent-withdrawals">
+            <h2 class="section-title"><i class="fas fa-history"></i> Последни успешни тегления</h2>
+            <ul class="withdrawal-list" id="withdrawalList">
+                <!-- Recent withdrawals will be populated here -->
+            </ul>
+        </div>
+        
+        <footer>
+            <p>Евро Банк АД - Всички права запазени © 2023</p>
+            <p>Бул. "Цар Борис III" 123, София 1612 | Телефон: 02 123 4567 | Имейл: info@eurobank.bg</p>
+            <p style="margin-top: 10px; font-size: 0.8rem; color: #999;">Този уебсайт е защитен с криптиране. Вашите данни са в безопасност.</p>
+        </footer>
+    </div>
+
+    <script>
+        // Initial list of recent withdrawals
+        const recentWithdrawals = [
+            { name: "Иван Петров", date: "15.10.2023", amount: "60 000 €" },
+            { name: "Мария Георгиева", date: "14.10.2023", amount: "60 000 €" },
+            { name: "Георги Димитров", date: "13.10.2023", amount: "60 000 €" },
+            { name: "Анна Стоянова", date: "12.10.2023", amount: "60 000 €" },
+            { name: "Петър Иванов", date: "11.10.2023", amount: "60 000 €" },
+            { name: "Стефка Михайлова", date: "10.10.2023", amount: "60 000 €" },
+            { name: "Николай Василев", date: "09.10.2023", amount: "60 000 €" }
+        ];
+        
+        // Populate recent withdrawals list
+        const withdrawalList = document.getElementById('withdrawalList');
+        
+        function populateWithdrawals() {
+            withdrawalList.innerHTML = '';
+            recentWithdrawals.forEach(withdrawal => {
+                const listItem = document.createElement('li');
+                listItem.className = 'withdrawal-item';
+                listItem.innerHTML = `
+                    <div>
+                        <div class="withdrawal-name">${withdrawal.name}</div>
+                        <div class="withdrawal-date">${withdrawal.date}</div>
+                    </div>
+                    <div class="withdrawal-amount">${withdrawal.amount}</div>
+                `;
+                withdrawalList.appendChild(listItem);
+            });
+        }
+        
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            populateWithdrawals();
+            
+            // Form submission
+            const userForm = document.getElementById('userForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const withdrawBtn = document.getElementById('withdrawBtn');
+            const processingSection = document.getElementById('processingSection');
+            
+            userForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Validate form
+                const name = document.getElementById('name').value;
+                const accountNumber = document.getElementById('accountNumber').value;
+                const bankName = document.getElementById('bankName').value;
+                const bankBranch = document.getElementById('bankBranch').value;
+                const email = document.getElementById('email').value;
+                const phone = document.getElementById('phone').value;
+                
+                if (name && accountNumber && bankName && bankBranch && email && phone) {
+                    // Enable withdrawal button
+                    withdrawBtn.disabled = false;
+                    withdrawBtn.classList.remove('btn-disabled');
+                    
+                    // Show success message
+                    submitBtn.innerHTML = '<i class="fas fa-check"></i> Данните са запазени';
+                    submitBtn.style.background = 'linear-gradient(to right, #2e7d32, #1b5e20)';
+                    
+                    // Change button text after a delay
+                    setTimeout(() => {
+                        submitBtn.innerHTML = 'Данните са актуализирани';
+                    }, 1500);
+                }
+            });
+            
+            // Withdrawal button click
+            withdrawBtn.addEventListener('click', function() {
+                if (!withdrawBtn.disabled) {
+                    // Show processing section
+                    processingSection.style.display = 'block';
+                    withdrawBtn.style.display = 'none';
+                    
+                    // Simulate payment processing
+                    setTimeout(() => {
+                        // Add new withdrawal to the list
+                        const currentDate = new Date();
+                        const formattedDate = `${currentDate.getDate().toString().padStart(2, '0')}.${(currentDate.getMonth()+1).toString().padStart(2, '0')}.${currentDate.getFullYear()}`;
+                        
+                        const userName = document.getElementById('name').value;
+                        const newWithdrawal = {
+                            name: userName,
+                            date: formattedDate,
+                            amount: "60 000 €"
+                        };
+                        
+                        // Add to beginning of array
+                        recentWithdrawals.unshift(newWithdrawal);
+                        populateWithdrawals();
+                        
+                        // Show success message
+                        processingSection.innerHTML = `
+                            <div style="color: #2e7d32; font-size: 3rem; margin-bottom: 20px;">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <h3 style="color: #2e7d32; margin-bottom: 15px;">Тегленето е успешно!</h3>
+                            <p>Вашето плащане от 300 € е прието.</p>
+                            <p>Сумата от 60 000 € ще бъде преведена по посочената от вас банкова сметка в рамките на 2 работни дни.</p>
+                            <p style="margin-top: 20px; font-size: 0.9rem; color: #666;">Ще получите потвърждение по имейл и SMS.</p>
+                        `;
+                        
+                        // Update balance to show it's been withdrawn (in a real app, this would be handled server-side)
+                        setTimeout(() => {
+                            document.querySelector('.balance-amount').innerHTML = '0 <span class="currency">€</span>';
+                            document.querySelector('.balance-display p').textContent = 'Сумата е изтеглена успешно';
+                            document.querySelector('.balance-display').style.borderLeftColor = '#2e7d32';
+                        }, 500);
+                    }, 3000);
+                }
+            });
+            
+            // Disable withdraw button initially
+            withdrawBtn.classList.add('btn-disabled');
+        });
+    </script>
+</body>
+</html>
